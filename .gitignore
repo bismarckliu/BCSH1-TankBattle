@@ -1,0 +1,14 @@
+# .NET 编译输出（自动生成，不需要上传）
+bin/
+obj/
+
+# Visual Studio 用户配置
+*.user
+.vs/
+
+# Rider IDE
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
