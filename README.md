@@ -105,12 +105,6 @@ dotnet run
 
 ---
 
-## Dokumentace assetů a zdrojů / 资源与来源文档
-
-> ⚠️ **Povinná součást semestrální práce dle požadavků BCSH1** — nedokumentované assety nebo tutoriály jsou důvodem k hodnocení „fail".  
-> 以下为课程 BCSH1 强制要求的资源声明章节，未注明来源的资源或教程将导致不合格。
-
----
 
 ### 🎨 Grafické assety / 图形资源
 
@@ -131,8 +125,6 @@ dotnet run
 
 > 📌 Projekt **nepoužívá žádné externí obrázky, sprity ani zvukové soubory**.  
 > Veškerá grafika je generována výhradně kódem přes `System.Drawing.Graphics`.  
-> 本项目**不包含任何外部图片、精灵图或音效文件**，全部图形均通过 `System.Drawing.Graphics` 以代码绘制。
-
 ---
 
 ### 🎬 Použité tutoriály a výukové materiály / 参考教程与学习资料
