@@ -68,9 +68,6 @@ TankBattle/
     ├── MainForm.cs             # Hlavní menu / 主菜单（标题浮动动画, 小坦克装饰）
     ├── GameForm.cs             # Herní formulář / 游戏主窗体（双缓冲, 60fps Timer, 状态机）
     └── HighScoreForm.cs        # Žebříček skóre / 高分榜窗体（排行前5条）
-```
-
----
 
 ## Použité C# techniky / 使用的 C# 技术
 

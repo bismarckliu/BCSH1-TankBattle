@@ -38,6 +38,9 @@ public class GameForm : Form
     // 使用 HashSet 记录所有当前按下的键（支持多键同时按下）
     private readonly HashSet<Keys> _pressedKeys = new HashSet<Keys>();
 
+    // Space 键射击标志（由 ProcessCmdKey 直接设置，绕过 KeyDown 被拦截的问题）
+    private bool _shootPressed;
+
     // ── 游戏状态 ──────────────────────────────────────────────────────────────
     private GameState _state;
     private int _stateTimer; // 状态计时器（帧数），用于动画延迟
@@ -194,30 +197,43 @@ public class GameForm : Form
         if (moveDir.HasValue)
         {
             _player.Direction = moveDir.Value;
+
+            // 预测移动后的位置，只有合法时才真正移动（避免卡死问题）
             _player.Move();
+
+            bool blocked = false;
 
             // 边界检测
             if (CollisionDetector.IsOutOfBounds(_player.Bounds, MapWidth, MapHeight))
-                _player.UndoMove();
+                blocked = true;
 
             // 墙壁碰撞
-            if (CollisionDetector.CollidesWithWalls(_player.Bounds, _walls))
-                _player.UndoMove();
+            if (!blocked && CollisionDetector.CollidesWithWalls(_player.Bounds, _walls))
+                blocked = true;
 
             // 与敌人坦克碰撞（不可穿越）
-            foreach (EnemyTank enemy in _enemies)
+            if (!blocked)
             {
-                if (enemy.IsActive && CollisionDetector.TanksOverlap(_player.Bounds, enemy.Bounds))
+                foreach (EnemyTank enemy in _enemies)
                 {
-                    _player.UndoMove();
-                    break;
+                    if (enemy.IsActive && CollisionDetector.TanksOverlap(_player.Bounds, enemy.Bounds))
+                    {
+                        blocked = true;
+                        break;
+                    }
                 }
             }
+
+            if (blocked)
+                _player.UndoMove(); // 恢复到移动前的位置
         }
 
-        // 射击：Space 键
-        if (_pressedKeys.Contains(Keys.Space))
+        // 射击：Space 键（每次按下只射一发，松开后才能再射）
+        if (_shootPressed)
+        {
             _player.TryShoot();
+            _shootPressed = false; // 消费掉本次按键，避免持续按住变成自动射击
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -571,13 +587,26 @@ public class GameForm : Form
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
-        // 防止方向键触发窗体默认焦点切换行为
+        const int WM_KEYDOWN = 0x0100;
+        const int WM_KEYUP   = 0x0101;
+
+        // 防止方向键触发窗体默认焦点切换行为，并在此处直接处理 Space 射击
         if (keyData == Keys.Up || keyData == Keys.Down ||
-            keyData == Keys.Left || keyData == Keys.Right ||
-            keyData == Keys.Space)
+            keyData == Keys.Left || keyData == Keys.Right)
         {
-            return true; // 已处理
+            return true; // 已处理，阻止焦点移动
         }
+
+        // Space 键：在此处拦截并设置射击标志，不依赖 KeyDown 事件
+        if (keyData == Keys.Space)
+        {
+            if (msg.Msg == WM_KEYDOWN)
+                _shootPressed = true;
+            else if (msg.Msg == WM_KEYUP)
+                _shootPressed = false;
+            return true;
+        }
+
         return base.ProcessCmdKey(ref msg, keyData);
     }
 
